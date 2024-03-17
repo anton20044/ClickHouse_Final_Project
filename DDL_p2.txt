@@ -1,0 +1,79 @@
+CREATE TABLE IF NOT EXISTS billing_reports.nach_vid_potr ON CLUSTER cluster
+(
+   au UInt32,
+   moment DateTime('Asia/Yekaterinburg'),
+   gro UInt32,
+   dogovor UInt32,
+   grs UInt32,
+   vid_potr UInt32,
+   summ_vol Decimal64(3),
+   summ Decimal64(2)
+
+) ENGINE ReplicatedMergeTree('/clickhouse/tables/nach', '{replica}') 
+PARTITION BY toYYYYMM(moment)  
+ORDER BY (au, moment, gro, dogovor, grs, vid_potr); 
+
+
+
+CREATE TABLE IF NOT EXISTS billing_reports.nach_grs ON CLUSTER click_cluster
+(
+   au UInt32,
+   moment DateTime('Asia/Yekaterinburg'),
+   grs UInt32,
+   summ_vol Decimal64(3),
+   summ Decimal64(2)
+
+) ENGINE ReplicatedMergeTree('/clickhouse/tables/nach_grs', '{replica}') 
+PARTITION BY toYYYYMM(moment)  
+ORDER BY (au, moment, grs); 
+
+
+
+
+
+CREATE TABLE IF NOT EXISTS billing_reports.null_nach_table ON CLUSTER cluster
+(
+   au UInt32,
+   moment DateTime('Asia/Yekaterinburg'),
+   accp UInt64,
+   gro UInt32,
+   dogovor UInt32,
+   grs UInt32,
+   usluga UInt32,
+   vid_potr UInt32,
+   nach Decimal64(2),
+   volume_nach Decimal64(3)
+)
+ENGINE Null;
+
+
+
+CREATE MATERIALIZED VIEW billing_reports.nach_vid_potr_mv ON CLUSTER cluster
+TO billing_reports.nach_vid_potr
+AS
+SELECT au, moment, gro, dogovor, grs, vid_potr, SUM(nach) as summ, SUM(volume_nach) as summ_vol
+FROM billing_reports.null_nach_table
+GROUP BY au, moment, gro, dogovor, grs, vid_potr;
+
+
+CREATE MATERIALIZED VIEW billing_reports.nach_grs_mv ON CLUSTER cluster
+TO billing_reports.nach_grs
+AS
+SELECT au, moment, grs, SUM(nach) as summ, SUM(volume_nach) as summ_vol
+FROM billing_reports.null_nach_table
+GROUP BY au, moment, grs;
+
+
+
+CREATE TABLE billing_reports.pg_data ON CLUSTER cluster ON CLUSTER cluster
+( 	
+	au UInt32, moment DateTime('Asia/Yekaterinburg'), accp UInt64, gro UInt32, dogovor UInt32, grs UInt32, usluga UInt32, 
+		vid_potr UInt32, nach Decimal64(2), volume_nach Decimal64(3) 
+
+) ENGINE = PostgreSQL('192.168.50.111:5432', 'RB', 'nach_vw', 'cl', 'cl', 'public')
+
+
+insert into billing_reports.null_nach_table
+select au, moment, accp, gro, dogovor, grs, usluga, vid_potr, nach, volume_nach 
+from billing_reports.pg_data where toDate(moment, 'Asia/Yekaterinburg') = '20240301'
+

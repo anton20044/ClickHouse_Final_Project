@@ -1,0 +1,126 @@
+
+
+
+CREATE DICTIONARY vid_potr_dt ON CLUSTER cluster
+(
+	k_vid_potr UInt32,
+	n_vid_potr String
+)
+PRIMARY KEY k_vid_potr
+SOURCE(POSTGRESQL(HOST '192.168.50.111' PORT 5432 USER 'cl' PASSWORD 'cl' DB 'RB' SCHEMA 'public' TABLE 'vid_potr' 
+invalidate_query 'SELECT k_vid_potr, n_vid_potr FROM vid_potr'
+))
+
+LIFETIME(300)
+LAYOUT(complex_key_hashed())
+
+
+
+CREATE DICTIONARY usluga_dt ON CLUSTER cluster
+(
+	k_usluga UInt32,
+	n_usluga String
+)
+PRIMARY KEY k_usluga
+SOURCE(POSTGRESQL(HOST '192.168.50.111' PORT 5432 USER 'cl' PASSWORD 'cl' DB 'RB' SCHEMA 'public' TABLE 'usluga' 
+invalidate_query 'SELECT k_usluga, n_usluga FROM usluga'
+))
+
+LIFETIME(300)
+LAYOUT(complex_key_hashed())
+
+
+
+CREATE DICTIONARY param_dt ON CLUSTER cluster
+(
+	k_param String,
+	n_param String
+)
+PRIMARY KEY k_param
+SOURCE(POSTGRESQL(HOST '192.168.50.111' PORT 5432 USER 'cl' PASSWORD 'cl' DB 'RB' SCHEMA 'public' TABLE 'param' 
+invalidate_query 'SELECT k_param, n_param FROM param'
+))
+
+LIFETIME(300)
+LAYOUT(complex_key_hashed())
+
+
+----
+CREATE DICTIONARY mo_dt ON CLUSTER cluster
+(
+	k_mo UInt32,
+	n_mo String
+)
+PRIMARY KEY k_mo
+SOURCE(POSTGRESQL(HOST '192.168.50.111' PORT 5432 USER 'cl' PASSWORD 'cl' DB 'RB' SCHEMA 'public' TABLE 'mo' 
+invalidate_query 'SELECT k_mo, n_mo FROM mo'
+))
+
+LIFETIME(300)
+LAYOUT(complex_key_hashed())
+
+
+
+CREATE DICTIONARY np_dt ON CLUSTER cluster
+(
+	k_np UInt32,
+	n_np String
+)
+PRIMARY KEY k_np
+SOURCE(POSTGRESQL(HOST '192.168.50.111' PORT 5432 USER 'cl' PASSWORD 'cl' DB 'RB' SCHEMA 'public' TABLE 'np' 
+invalidate_query 'SELECT k_np, n_np FROM np'
+))
+
+LIFETIME(300)
+LAYOUT(complex_key_hashed())
+
+
+CREATE DICTIONARY gro_dt ON CLUSTER cluster
+(
+	k_gro UInt32,
+	n_gro String
+)
+PRIMARY KEY k_gro
+SOURCE(POSTGRESQL(HOST '192.168.50.111' PORT 5432 USER 'cl' PASSWORD 'cl' DB 'RB' SCHEMA 'public' TABLE 'grp' 
+invalidate_query 'SELECT k_grp, n_grp FROM grp where k_vid = 3'
+))
+
+LIFETIME(300)
+LAYOUT(complex_key_hashed())
+
+
+
+
+CREATE DICTIONARY grs_dt ON CLUSTER cluster
+(
+	k_grs UInt32,
+	n_grs String
+)
+PRIMARY KEY k_grs
+SOURCE(POSTGRESQL(HOST '192.168.50.111' PORT 5432 USER 'cl' PASSWORD 'cl' DB 'RB' SCHEMA 'public' TABLE 'grp' 
+invalidate_query 'SELECT k_grp, n_grp FROM grp where k_vid = 2'
+))
+
+LIFETIME(300)
+LAYOUT(complex_key_hashed())
+
+
+
+
+CREATE DICTIONARY dogovor_dt ON CLUSTER cluster
+(
+	k_dogovor UInt32,
+	n_dogovor String
+)
+PRIMARY KEY k_dogovor
+SOURCE(POSTGRESQL(HOST '192.168.50.111' PORT 5432 USER 'cl' PASSWORD 'cl' DB 'RB' SCHEMA 'public' TABLE 'grp' 
+invalidate_query 'SELECT k_grp, n_grp FROM grp where k_vid = 1'
+))
+
+LIFETIME(300)
+LAYOUT(complex_key_hashed())
+
+
+
+
+

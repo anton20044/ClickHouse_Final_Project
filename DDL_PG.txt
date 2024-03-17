@@ -1,0 +1,35 @@
+--Table
+-----
+create table vid_potr (k_vid_potr int, n_vid_potr text);
+
+-----
+create table usluga (k_usluga int, n_usluga text);
+
+-----
+create table param (k_param int, n_param text);
+
+-----
+create table grp (k_grp int, k_vid int, n_grp text);
+
+-----
+create table mo (k_mo int, n_mo text);
+
+-----
+create table np (k_np int, n_np text);
+
+-----
+create table nach (au int, moment date, accp bigint, gro int, dogovor int, grs int, usluga int, 
+	vid_potr int, nach decimal(14,2), volume_nach decimal(15,3));
+
+-----
+create table dz (au int, moment date, accp bigint, gro int, mo int, np int, dogovor int, grs int, 
+	usluga int, beg_moment date, dz decimal(14,2));
+
+--View
+-----
+create or replace view public.nach_vw as 
+	select au, moment, accp, gro, dogovor, grs, usluga, vid_potr, nach, volume_nach from nach;
+
+----- 
+create or replace view public.dz_vw as 
+	select au, moment, accp, gro, mo, np, dogovor, grs, usluga, beg_moment, dz from dz;

@@ -1,0 +1,126 @@
+CREATE DATABASE billing_reports;
+
+
+CREATE TABLE IF NOT EXISTS billing_reports.structureDZ ON CLUSTER cluster
+(
+   au UInt64,
+   moment DateTime('Asia/Yekaterinburg'),
+   usluga UInt64,
+   count_ab_kz UInt64,
+   saldo_kz Decimal64(2),
+   count_ab_dz UInt64,
+   dz1 Decimal64(2),
+   count_ab1 UInt64,
+   dz3 Decimal64(2),
+   count_ab3 UInt64,
+   dz6 Decimal64(2),
+   count_ab6 UInt64,
+   dz12 Decimal64(2),
+   count_ab12 UInt64,
+   dz24 Decimal64(2),
+   count_ab24 UInt64,
+   dz36 Decimal64(2),
+   count_ab36 UInt64,
+   dz_old36 Decimal64(2),
+   count_ab_old36 UInt64
+
+) ENGINE ReplicatedMergeTree('/clickhouse/tables/structureDZ', '{replica}') 
+PARTITION BY toYYYYMM(moment)  
+ORDER BY (au, moment, usluga);
+
+
+
+
+CREATE TABLE IF NOT EXISTS billing_reports.MODZ ON CLUSTER cluster
+(
+   au UInt32,
+   moment DateTime('Asia/Yekaterinburg'),
+   mo UInt32,
+   np UInt32,
+   dz1 Decimal64(2),
+   dz6 Decimal64(2),
+   dz12 Decimal64(2),
+   dz18 Decimal64(2),
+   dz24 Decimal64(2),
+   dz36 Decimal64(2)
+
+) ENGINE ReplicatedMergeTree('/clickhouse/tables/MODZ', '{replica}') 
+PARTITION BY toYYYYMM(moment)  
+ORDER BY (au, moment, mo, np);
+
+
+
+
+
+CREATE TABLE IF NOT EXISTS billing_reports.null_table ON CLUSTER cluster
+(
+   au UInt32,
+   moment DateTime('Asia/Yekaterinburg'),
+   accp UInt64,
+   mo UInt32,
+   np UInt32,
+   gro UInt32,
+   dogovor UInt32,
+   grs UInt32,
+   usluga UInt32,
+   beg_moment DateTime('Asia/Yekaterinburg'),
+   dz Decimal64(2)
+)
+ENGINE Null;
+
+
+
+
+CREATE MATERIALIZED VIEW billing_reports.MODZ_mv ON CLUSTER cluster
+TO billing_reports.MODZ
+AS
+SELECT au, moment, mo, np, sum(if(moment - INTERVAL 6 MONTH < beg_moment AND dz > 0, dz,0)) as dz1,
+sum(if((moment - INTERVAL 6 MONTH >= beg_moment and moment - INTERVAL 12 MONTH < beg_moment) AND dz > 0, dz, 0)) as dz6,
+sum(if((moment - INTERVAL 12 MONTH >= beg_moment and moment - INTERVAL 18 MONTH < beg_moment) AND dz > 0, dz, 0)) as dz12,
+sum(if((moment - INTERVAL 18 MONTH >= beg_moment and moment - INTERVAL 24 MONTH < beg_moment) AND dz > 0, dz, 0)) as dz18,
+sum(if((moment - INTERVAL 24 MONTH >= beg_moment and moment - INTERVAL 36 MONTH < beg_moment) AND dz > 0, dz, 0)) as dz24,
+sum(if(moment - INTERVAL 36 MONTH >= beg_moment AND dz > 0, dz,0)) as dz36
+FROM billing_reports.null_table
+WHERE usluga = 1
+GROUP BY au, moment, mo, np;
+
+
+
+
+
+CREATE MATERIALIZED VIEW billing_reports.structureDZ_mv ON CLUSTER cluster
+TO billing_reports.structureDZ
+AS
+SELECT au, moment, usluga, sum(if(dz < 0, 1, 0)) as count_ab_kz, sum(if(dz < 0, dz, 0)) as saldo_kz,
+sum(if(dz > 0 AND moment - INTERVAL 3 MONTH < beg_moment, dz, 0)) dz1,
+uniqIf(accp, dz > 0 AND moment - INTERVAL 3 MONTH < beg_moment) as count_ab1,
+sum(if(dz > 0 AND (moment - INTERVAL 3 MONTH >= beg_moment and moment - INTERVAL 6 MONTH < beg_moment), dz, 0)) dz3,
+uniqIf(accp, dz > 0 AND (moment - INTERVAL 3 MONTH >= beg_moment and moment - INTERVAL 6 MONTH < beg_moment)) as count_ab3,
+sum(if(dz > 0 AND (moment - INTERVAL 6 MONTH >= beg_moment and moment - INTERVAL 12 MONTH < beg_moment), dz, 0)) dz6,
+uniqIf(accp, dz > 0 AND (moment - INTERVAL 6 MONTH >= beg_moment and moment - INTERVAL 12 MONTH < beg_moment)) as count_ab6,
+sum(if(dz > 0 AND (moment - INTERVAL 12 MONTH >= beg_moment and moment - INTERVAL 24 MONTH < beg_moment), dz, 0)) dz12,
+uniqIf(accp, dz > 0 AND (moment - INTERVAL 12 MONTH >= beg_moment and moment - INTERVAL 24 MONTH < beg_moment)) as count_ab12,
+sum(if(dz > 0 AND (moment - INTERVAL 24 MONTH >= beg_moment and moment - INTERVAL 36 MONTH < beg_moment), dz, 0)) dz36,
+uniqIf(accp, dz > 0 AND (moment - INTERVAL 24 MONTH >= beg_moment and moment - INTERVAL 36 MONTH < beg_moment)) as count_ab36,
+sum(if(dz > 0 AND moment - INTERVAL 36 MONTH >= beg_moment, dz, 0)) dz_old36,
+uniqIf(accp, dz > 0 AND moment - INTERVAL 36 MONTH >= beg_moment) as count_ab_old36
+
+FROM billing_reports.null_table
+GROUP BY au, moment, usluga;
+
+
+
+
+
+CREATE TABLE billing_reports.pg_data_dz ON CLUSTER cluster
+( 	
+	au UInt32, moment DateTime('Asia/Yekaterinburg'), accp UInt64, gro UInt32, mo UInt32, np UInt32, dogovor UInt32, grs UInt32, usluga UInt32,
+	beg_moment DateTime('Asia/Yekaterinburg'), dz Decimal64(2)
+
+) ENGINE = PostgreSQL('192.168.50.111:5432', 'RB', 'dz_vw', 'cl', 'cl', 'public')
+
+
+
+insert into billing_reports.null_table
+select au, moment, accp, gro, mo, np, dogovor, grs, usluga, beg_moment, dz 
+from billing_reports.pg_data_dz where toDate(moment, 'Asia/Yekaterinburg') = '20240201'

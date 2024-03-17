@@ -1,0 +1,86 @@
+<clickhouse>
+    <logger>
+        <level>warning</level>
+    </logger>
+</clickhouse>
+
+<clickhouse>
+    <prometheus>
+        <endpoint>/metrics</endpoint>
+        <port>9363</port>
+
+        <metrics>true</metrics>
+        <events>true</events>
+        <asynchronous_metrics>true</asynchronous_metrics>
+    </prometheus>
+</clickhouse>
+
+<clickhouse>
+	<listen_host>0.0.0.0</listen_host> 
+</clickhouse>
+
+
+<clickhouse>
+        <remote_servers>
+                <cluster>
+                        <shard>
+                            <replica>
+                                <host>192.168.50.118</host>
+                                <port>9000</port>
+                            </replica>
+                            <replica>
+                                <host>192.168.50.114</host>
+                                <port>9000</port>
+                            </replica>
+                        </shard>
+                </cluster>
+        </remote_servers>
+</clickhouse>
+
+
+<clickhouse>
+        <remote_servers>
+                <cluster>
+                        <shard>
+                            <replica>
+                                <host>192.168.50.118</host>
+                                <port>9000</port>
+                            </replica>
+                            <replica>
+                                <host>192.168.50.119</host>
+                                <port>9000</port>
+                            </replica>
+                            <replica>
+                                <host>192.168.50.125</host>
+                                <port>9000</port>
+                            </replica>
+                        </shard>
+                    </cluster>
+</clickhouse>
+        </remote_servers>
+
+	-Макрос
+<clickhouse>
+        <macros>            
+            <replica>clickhouse02.home.local</replica>            
+        </macros>
+</clickhouse>
+
+	-Кластер ZooKeeper
+<clickhouse>
+        <zookeeper>
+            <node index="1">
+                <host>192.168.50.100</host>
+                <port>2181</port>
+            </node>
+            <node index="2">
+                <host>192.168.50.101</host>
+                <port>2181</port>
+            </node>
+            <node index="3">
+                <host>192.168.50.150</host>
+                <port>2181</port>
+            </node>
+        </zookeeper>
+</clickhouse>
+
