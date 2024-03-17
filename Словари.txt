@@ -77,10 +77,10 @@ LAYOUT(complex_key_hashed())
 
 CREATE DICTIONARY gro_dt ON CLUSTER cluster
 (
-	k_gro UInt32,
-	n_gro String
+	k_grp UInt32,
+	n_grp String
 )
-PRIMARY KEY k_gro
+PRIMARY KEY k_grp
 SOURCE(POSTGRESQL(HOST '192.168.50.111' PORT 5432 USER 'cl' PASSWORD 'cl' DB 'RB' SCHEMA 'public' TABLE 'grp' 
 invalidate_query 'SELECT k_grp, n_grp FROM grp where k_vid = 3'
 ))
@@ -93,10 +93,10 @@ LAYOUT(complex_key_hashed())
 
 CREATE DICTIONARY grs_dt ON CLUSTER cluster
 (
-	k_grs UInt32,
-	n_grs String
+	k_grp UInt32,
+	n_grp String
 )
-PRIMARY KEY k_grs
+PRIMARY KEY k_grp
 SOURCE(POSTGRESQL(HOST '192.168.50.111' PORT 5432 USER 'cl' PASSWORD 'cl' DB 'RB' SCHEMA 'public' TABLE 'grp' 
 invalidate_query 'SELECT k_grp, n_grp FROM grp where k_vid = 2'
 ))
@@ -109,10 +109,10 @@ LAYOUT(complex_key_hashed())
 
 CREATE DICTIONARY dogovor_dt ON CLUSTER cluster
 (
-	k_dogovor UInt32,
-	n_dogovor String
+	k_grp UInt32,
+	n_grp String
 )
-PRIMARY KEY k_dogovor
+PRIMARY KEY k_grp
 SOURCE(POSTGRESQL(HOST '192.168.50.111' PORT 5432 USER 'cl' PASSWORD 'cl' DB 'RB' SCHEMA 'public' TABLE 'grp' 
 invalidate_query 'SELECT k_grp, n_grp FROM grp where k_vid = 1'
 ))
